@@ -1,0 +1,30 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Cliente {
+  id           String       @id @default(uuid())
+  dni          String       @unique  // <--- NUEVA CLAVE ÚNICA
+  nombre       String
+  telefono     String?      // Agregamos el teléfono (opcional)
+  reparaciones Reparacion[]
+}
+
+model Reparacion {
+  id          String   @id @default(uuid())
+  equipo      String
+  trabajo     String
+  estado      String   @default("Ingresado")
+  precio      Float?
+  createdAt   DateTime @default(now())
+  
+  // Relación con la tabla Cliente (ahora sí, adentro del modelo)
+  clienteId   String
+  cliente     Cliente  @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+}
