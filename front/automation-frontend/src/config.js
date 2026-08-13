@@ -1,4 +1,4 @@
-export const API_URL = import.meta.env.VITE_API_URL || 'https://tallerfix.onrender.com';
+export const API_URL = import.meta.env.VITE_API_URL ,
 
 export const SITE_CONFIG = {
   appName: import.meta.env.VITE_APP_NAME || 'Sistema de Gestión',
