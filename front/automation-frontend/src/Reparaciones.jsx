@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
+import { TALLER_CONFIG } from './config';
 
-const API_URL = 'http://localhost:3000';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 export function Reparaciones() {
   const [reparaciones, setReparaciones] = useState([]);
@@ -60,7 +61,7 @@ export function Reparaciones() {
       const rep = reparaciones.find((r) => r.id === id);
       if (rep && rep.telefono) {
         const telefonoWA = formatearTelefonoWA(rep.telefono);
-        const mensaje = `¡Hola ${rep.cliente}! 🛠️ Te avisamos que el trabajo en tu *${rep.equipo}* ya está finalizado.\n\nPresupuesto final: *$${rep.precio}*.\n\nYa podés pasar a retirarlo. ¡Te esperamos!`;
+        const mensaje = TALLER_CONFIG.mensajeWhatsapp(rep.cliente, rep.equipo, rep.precio);
         const urlWs = `https://wa.me/${telefonoWA}?text=${encodeURIComponent(mensaje)}`;
         window.open(urlWs, '_blank');
       } else {
@@ -90,9 +91,9 @@ export function Reparaciones() {
   });
 
   return (
-    <main className="app-container">
+    <main className="app-header">
       <header className="app-header">
-        <h1>🛠️ Taller Fix - Gestión de Equipos</h1>
+        <h1>🛠️ {TALLER_CONFIG.nombre} - {TALLER_CONFIG.subtitulo}</h1>
       </header>
 
       <section className="form-section">
