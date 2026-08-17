@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-const API_URL = import.meta.env.VITE_API_URL ;
+const API_URL = import.meta.env.VITE_API_URL;
 
 export function Reparaciones() {
   const [reparaciones, setReparaciones] = useState([]);
@@ -29,10 +29,21 @@ export function Reparaciones() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Limpiamos el valor de precio para guardarlo como número
+    const precioNumerico = Number(precio.toString().replace(/\./g, '')) || 0;
+
     await fetch(`${API_URL}/reparaciones`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ dni, cliente, telefono, equipo, trabajo, precio })
+      body: JSON.stringify({ 
+        dni, 
+        cliente, 
+        telefono, 
+        equipo, 
+        trabajo, 
+        precio: precioNumerico 
+      })
     });
 
     setDni(''); setCliente(''); setTelefono(''); setEquipo(''); setTrabajo(''); setPrecio('');
@@ -41,7 +52,7 @@ export function Reparaciones() {
 
   const formatearTelefonoWA = (numero) => {
     if (!numero) return '';
-    let limpio = numero.replace(/\D/g, '');
+    let limpio = numero.toString().replace(/\D/g, '');
     if (limpio.startsWith('0')) limpio = limpio.slice(1);
     if (limpio.startsWith('549') && limpio.length === 13) return limpio;
     if (limpio.length === 10) return `549${limpio}`;
@@ -60,7 +71,8 @@ export function Reparaciones() {
       const rep = reparaciones.find((r) => r.id === id);
       if (rep && rep.telefono) {
         const telefonoWA = formatearTelefonoWA(rep.telefono);
-        const mensaje = `¡Hola ${rep.cliente}! 🛠️ Te avisamos que el trabajo en tu *${rep.equipo}* ya está finalizado.\n\nPresupuesto final: *$${rep.precio}*.\n\nYa podés pasar a retirarlo. ¡Te esperamos!`;
+        const precioFormateado = Number(rep?.precio || rep?.presupuesto || 0).toLocaleString('es-AR');
+        const mensaje = `¡Hola ${rep.cliente}! 🛠️ Te avisamos que el trabajo en tu *${rep.equipo}* ya está finalizado.\n\nPresupuesto final: *$${precioFormateado}*.\n\nYa podés pasar a retirarlo. ¡Te esperamos!`;
         const urlWs = `https://wa.me/${telefonoWA}?text=${encodeURIComponent(mensaje)}`;
         window.open(urlWs, '_blank');
       } else {
@@ -84,7 +96,10 @@ export function Reparaciones() {
 
   const reparacionesFiltradas = reparaciones.filter((rep) => {
     const termino = busqueda.toLowerCase();
-    const coincideTexto = rep.cliente.toLowerCase().includes(termino) || rep.equipo.toLowerCase().includes(termino);
+    const clienteTexto = (rep?.cliente || '').toLowerCase();
+    const equipoTexto = (rep?.equipo || '').toLowerCase();
+
+    const coincideTexto = clienteTexto.includes(termino) || equipoTexto.includes(termino);
     const coincideEstado = filtroEstado === 'Todos' || rep.estado === filtroEstado;
     return coincideTexto && coincideEstado;
   });
@@ -182,7 +197,9 @@ export function Reparaciones() {
               <article key={rep.id} className="repair-card">
                 <div className="repair-info">
                   <h4>{rep.equipo} - <span className="repair-client">{rep.cliente}</span></h4>
-                  <p className="repair-details">{rep.trabajo} | Presupuesto: ${Number(rep?.precio || rep?.presupuesto || 0).toLocaleString('es-AR')}</p>
+                  <p className="repair-details">
+                    {rep.trabajo} | Presupuesto: ${Number(rep?.precio || rep?.presupuesto || 0).toLocaleString('es-AR')}
+                  </p>
                   <span className="status-badge" style={{ backgroundColor: getStatusColor(rep.estado) }}>
                     {rep.estado}
                   </span>
