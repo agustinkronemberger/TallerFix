@@ -70,7 +70,7 @@ export function Reparaciones() {
     cargarReparaciones();
   };
 
-  const borrarReparacion = async (id) => {
+  const borrarReparaciones = async (id) => {
     await fetch(`${API_URL}/reparaciones/${id}`, { method: 'DELETE' });
     cargarReparaciones();
   };
@@ -199,7 +199,7 @@ export function Reparaciones() {
                     <option value="En Proceso">En Proceso</option>
                     <option value="Listo">Listo</option>
                   </select>
-                  <button onClick={() => borrarReparacion(rep.id)} className="btn-danger" aria-label="Eliminar registro">
+                  <button onClick={() => borrarReparaciones(rep.id)} className="btn-danger" aria-label="Eliminar registro">
                     Eliminar
                   </button>
                 </div>
