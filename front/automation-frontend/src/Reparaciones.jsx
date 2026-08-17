@@ -182,7 +182,7 @@ export function Reparaciones() {
               <article key={rep.id} className="repair-card">
                 <div className="repair-info">
                   <h4>{rep.equipo} - <span className="repair-client">{rep.cliente}</span></h4>
-                  <p className="repair-details">{rep.trabajo} |Presupuesto: ${Number(Reparaciones.precio).toLocaleString('es-AR')}</p>
+                  <p className="repair-details">{rep.trabajo} |Presupuesto: ${Number(rep.precio).toLocaleString('es-AR')}</p>
                   <span className="status-badge" style={{ backgroundColor: getStatusColor(rep.estado) }}>
                     {rep.estado}
                   </span>
