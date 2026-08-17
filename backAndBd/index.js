@@ -4,8 +4,16 @@ import cors from 'cors';
 import { PrismaClient } from '@prisma/client';
 
 const app = express();
-const prisma = new PrismaClient();
+
+// Instancia única de Prisma (Singleton) para evitar saturar conexiones
 const globalForPrisma = global;
+export const prisma =
+  globalForPrisma.prisma ||
+  new PrismaClient({
+    log: ['error'],
+  });
+
+if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
 
 // Middlewares
 app.use(cors());
@@ -102,7 +110,6 @@ app.delete('/reparaciones/:id', async (req, res) => {
 
 // ==================== CLIENTES ====================
 
-// GET: Obtener lista completa de clientes con sus reparaciones
 app.get('/clientes', async (req, res) => {
     try {
         const clientes = await prisma.cliente.findMany({
@@ -115,7 +122,6 @@ app.get('/clientes', async (req, res) => {
     }
 });
 
-// PUT: Editar datos de un cliente existente
 app.put('/clientes/:id', async (req, res) => {
     const { id } = req.params;
     const { nombre, dni, telefono } = req.body;
@@ -131,7 +137,6 @@ app.put('/clientes/:id', async (req, res) => {
     }
 });
 
-// DELETE: Eliminar un cliente por ID
 app.delete('/clientes/:id', async (req, res) => {
     const { id } = req.params;
     try {
@@ -145,16 +150,8 @@ app.delete('/clientes/:id', async (req, res) => {
     }
 });
 
-// Levantar el servidor (Siempre al final)
+// Levantar el servidor
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`🚀 Servidorrrr corriendo en http://localhost:${PORT}`);
+  console.log(`🚀 Servidor corriendo en puerto ${PORT}`);
 });
-
-export const prisma =
-  globalForPrisma.prisma ||
-  new PrismaClient({
-    log: ['error'],
-  });
-
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
