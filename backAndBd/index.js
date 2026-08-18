@@ -155,3 +155,13 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🚀 Servidor corriendo en puerto ${PORT}`);
 });
+
+// Ruta para mantener viva la base de datos
+app.get('/health', async (req, res) => {
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    res.status(200).send('OK');
+  } catch (error) {
+    res.status(500).send('Error de conexión a la base de datos');
+  }
+});
