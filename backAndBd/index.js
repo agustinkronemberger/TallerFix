@@ -2,6 +2,7 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import { PrismaClient } from '@prisma/client';
+import { verificarApiKey } from './middleware/auth.js';
 
 const app = express();
 
@@ -16,7 +17,7 @@ export const prisma =
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
 
 // Middlewares
-app.use(cors());
+app.use(cors({ origin: 'https://taller-sanmartin.vercel.app' }));
 app.use(express.json());
 
 // Ruta de prueba base
@@ -58,7 +59,7 @@ app.post('/reparaciones', async (req, res) => {
     }
 }); 
 
-app.get('/reparaciones', async (req, res) => {
+app.get('/reparaciones', verificarApiKey, rutasReparaciones, async (req, res) => {
     try {
         const reparaciones = await prisma.reparacion.findMany({
             include: { cliente: true },
@@ -110,7 +111,7 @@ app.delete('/reparaciones/:id', async (req, res) => {
 
 // ==================== CLIENTES ====================
 
-app.get('/clientes', async (req, res) => {
+app.get('/clientes',verificarApiKey, rutasClientes, async (req, res) => {
     try {
         const clientes = await prisma.cliente.findMany({
             include: { reparaciones: true }
@@ -156,12 +157,17 @@ app.listen(PORT, () => {
   console.log(`🚀 Servidor corriendo en puerto ${PORT}`);
 });
 
-// Ruta para mantener viva la base de datos
-app.get('/health', async (req, res) => {
-  try {
-    await prisma.$queryRaw`SELECT 1`;
-    res.status(200).send('OK');
-  } catch (error) {
-    res.status(500).send('Error de conexión a la base de datos');
+// Ruta pública para que UptimeRobot/Render sigan respondiendo OK sin fallar
+app.get('/health', (req, res) => res.status(200).send('OK'));
+
+// middleware/auth.js
+export const verificarApiKey = (req, res, next) => {
+  const apiKeyCliente = req.headers['x-api-key'];
+  const apiKeyServidor = process.env.X_API_KEY;
+
+  if (!apiKeyCliente || apiKeyCliente !== apiKeyServidor) {
+    return res.status(401).json({ error: 'Acceso no autorizado: API Key inválida o ausente' });
   }
-});
+
+  next(); // La clave es correcta, continúa con la ruta
+};

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { API_URL } from './config.js';
+import { API_URL, API_KEY } from './config.js';
 
 export function Clientes() {
   const [clientes, setClientes] = useState([]);
@@ -9,7 +9,9 @@ export function Clientes() {
 
   const cargarClientes = async () => {
     try {
-      const res = await fetch(`${API_URL}/clientes`);
+      const res = await fetch(`${API_URL}/clientes`, {
+        headers: { 'x-api-key': API_KEY }
+      });
       const data = await res.json();
       setClientes(Array.isArray(data) ? data : []);
     } catch (error) {
@@ -23,7 +25,10 @@ export function Clientes() {
 
   const handleEliminar = async (id) => {
     if (confirm('¿Estás seguro de eliminar este cliente? Se borrarán sus reparaciones.')) {
-      await fetch(`${API_URL}/clientes/${id}`, { method: 'DELETE' });
+      await fetch(`${API_URL}/clientes/${id}`, {
+        method: 'DELETE',
+        headers: { 'x-api-key': API_KEY }
+      });
       cargarClientes();
     }
   };
@@ -42,7 +47,10 @@ export function Clientes() {
     e.preventDefault();
     await fetch(`${API_URL}/clientes/${clienteEditando}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'x-api-key': API_KEY
+      },
       body: JSON.stringify(formData)
     });
     setClienteEditando(null);
@@ -118,7 +126,7 @@ export function Clientes() {
         />
       </div>
 
-      {/* Lista de clientes con el mismo estilo de tarjetas (repair-card) */}
+      {/* Lista de clientes */}
       <section className="form-section" style={{ marginTop: '1rem' }}>
         <h2>Clientes Registrados</h2>
 
