@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { API_URL, API_KEY } from './config.js';
+import { API_URL } from './config.js';
 
 export function Reparaciones() {
   const [reparaciones, setReparaciones] = useState([]);
@@ -18,9 +18,7 @@ export function Reparaciones() {
 
   const cargarReparaciones = async () => {
     try {
-      const res = await fetch(`${API_URL}/reparaciones`, {
-        headers: { 'x-api-key': API_KEY }
-      });
+      const res = await fetch(`${API_URL}/reparaciones`);
       const data = await res.json();
       setReparaciones(Array.isArray(data) ? data : []);
     } catch (error) {
@@ -31,14 +29,12 @@ export function Reparaciones() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Limpiamos el valor de precio para guardarlo como número
     const precioNumerico = Number(precio.toString().replace(/\./g, '')) || 0;
 
     await fetch(`${API_URL}/reparaciones`, {
       method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-        'x-api-key': API_KEY
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ 
         dni, 
         cliente, 
@@ -66,10 +62,7 @@ export function Reparaciones() {
   const cambiarEstado = async (id, nuevoEstado) => {
     await fetch(`${API_URL}/reparaciones/${id}`, {
       method: 'PUT',
-      headers: { 
-        'Content-Type': 'application/json',
-        'x-api-key': API_KEY
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ estado: nuevoEstado })
     });
 
@@ -89,10 +82,7 @@ export function Reparaciones() {
   };
 
   const borrarReparaciones = async (id) => {
-    await fetch(`${API_URL}/reparaciones/${id}`, { 
-      method: 'DELETE',
-      headers: { 'x-api-key': API_KEY }
-    });
+    await fetch(`${API_URL}/reparaciones/${id}`, { method: 'DELETE' });
     cargarReparaciones();
   };
 
